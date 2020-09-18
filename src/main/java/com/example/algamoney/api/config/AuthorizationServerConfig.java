@@ -1,4 +1,4 @@
-/*package com.example.algamoney.api.config;
+package com.example.algamoney.api.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +12,6 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
-@SuppressWarnings("deprecation")
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
@@ -20,14 +19,18 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	@Autowired 
 	private AuthenticationManager authenticationManager;
 	
+	/*When you are configuring the ClientDetailsServiceConfigurer, 
+	you have to also apply the new password storage format to the client secret.
+	.secret("{noop}secret")*/
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 		clients.inMemory()
 			.withClient("angular")
-			.secret("@ngul@r0")
+			.secret("{noop}@ngul@r0")
 			.scopes("read", "write")
-			.authorizedGrantTypes("password")
-			.accessTokenValiditySeconds(1800);
+			.authorizedGrantTypes("password", "refresh_token")
+			.accessTokenValiditySeconds(30)
+			.refreshTokenValiditySeconds(3600 * 24);
 	}
 	
 	@Override
@@ -35,6 +38,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 		endpoints
 			.tokenStore(tokenStore())
 			.accessTokenConverter(accessTokenConverter())
+			.reuseRefreshTokens(false)
 			.authenticationManager(authenticationManager);
 	}	
 	
@@ -49,4 +53,4 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	public TokenStore tokenStore() {
 		return new JwtTokenStore(accessTokenConverter());
 	}	
-}*/
+}
